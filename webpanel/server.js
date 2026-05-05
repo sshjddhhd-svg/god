@@ -836,6 +836,9 @@ code{
       </span>
       <span class="nav-label">تسجيل الخروج</span>
     </a>
+    <div style="padding:8px 12px 2px;font-size:.62rem;color:var(--text3);text-align:center;border-top:1px solid var(--border);margin-top:6px;line-height:1.7">
+      © ${new Date().getFullYear()} <strong style="color:var(--accent2)">WHITE V3</strong> by <strong style="color:var(--purple)">djamel</strong>
+    </div>
   </div>
 </aside>
 
@@ -2936,6 +2939,9 @@ app.get("/send", auth, (req, res) => {
 .feed-box::-webkit-scrollbar{width:4px}.feed-box::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
 .tpl-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:768px){
+  .two-col{grid-template-columns:1fr !important}
+}
 @media(max-width:600px){
   .glist{grid-template-columns:1fr;max-height:260px}
   .tpl-grid{grid-template-columns:1fr}
