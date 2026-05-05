@@ -7,7 +7,7 @@ const axios = require('axios');
       version: "1.0",
       author: "DJAMEL",
       countDown: 5,
-      role: 0,
+      role: 2,
       shortDescription: "يرد بترحيب شخصي",
       longDescription: "يرد على المستخدم بترحيب يذكر اسمه",
       category: "custom",
