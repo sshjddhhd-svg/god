@@ -1,166 +1,245 @@
 <div align="center">
 
-<img src="https://readme-typing-svg.herokuapp.com?font=Montserrat&weight=700&size=32&duration=3500&pause=700&color=58A6FF&center=true&vCenter=true&width=800&lines=🐐+GOAT+MESSENGER;⚡+Facebook+Messenger+Bot+Framework;🛠️+Modified+by+EryXenX" alt="Typing SVG" />
+<img src="https://readme-typing-svg.herokuapp.com?font=Montserrat&weight=700&size=32&duration=3500&pause=700&color=58A6FF&center=true&vCenter=true&width=800&lines=⚡+WHITE+V3;🤖+Facebook+Messenger+Bot;🛡️+Created+by+DJAMEL" alt="Typing SVG" />
 
 <br/>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-2.0.0-00FFD1?style=for-the-badge&logo=github&logoColor=white" />
-  <img src="https://img.shields.io/badge/Node.js-20.x-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" />
-  <img src="https://img.shields.io/badge/Based_on-Goat_Bot_V2-FF6B6B?style=for-the-badge&logo=github&logoColor=white" />
-  <img src="https://img.shields.io/badge/Fork_by-EryXenX-9B59B6?style=for-the-badge&logo=github&logoColor=white" />
+  <img src="https://img.shields.io/badge/Version-1.5.35-00FFD1?style=for-the-badge&logo=github&logoColor=white" />
+  <img src="https://img.shields.io/badge/Node.js-18.x-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" />
+  <img src="https://img.shields.io/badge/Creator-DJAMEL-FF6B6B?style=for-the-badge&logo=github&logoColor=white" />
+  <img src="https://img.shields.io/badge/Platform-Facebook_Messenger-1877F2?style=for-the-badge&logo=messenger&logoColor=white" />
 </p>
 
-<p align="center">🚀 Fast &nbsp;•&nbsp; 🤖 Smart &nbsp;•&nbsp; 🛡️ Reliable &nbsp;•&nbsp; 🐐 Powerful</p>
+<p align="center">🚀 Fast &nbsp;•&nbsp; 🤖 Smart &nbsp;•&nbsp; 🛡️ Reliable &nbsp;•&nbsp; 🔒 Secure &nbsp;•&nbsp; 🌍 Multi-language</p>
 
 </div>
 
 ---
 
-> ⚠️ **IMPORTANT ATTRIBUTION NOTICE**
+> ⚠️ **IMPORTANT**
 >
-> This project is a **custom fork** based on the fork chain below.
-> All original copyright belongs to **NTKhang (ntkhang03)**.
-> This repository preserves and respects the original license in full.
+> This project is created and maintained by **DJAMEL** ([@castrolmocro](https://github.com/castrolmocro)).
+> Do not sell, redistribute, or claim as your own.
+> All core development, architecture, and features are the work of **DJAMEL**.
 
 ---
 
-## 🔗 Fork Chain
+## 👨‍💻 Developer
 
-```
-ntkhang03  (Original Creator — Goat Bot V2)
-    └── NeoKEX  (Goatbot-updated — 1st fork)
-            └── EryXenX  (GOAT-MESSENGER — 2nd fork / this repo)
-```
+| | |
+|---|---|
+| **Developer** | DJAMEL |
+| **GitHub** | [@castrolmocro](https://github.com/castrolmocro) |
+| **Repository** | [castrolmocro/WHITE-V3](https://github.com/castrolmocro/WHITE-V3) |
+| **Version** | 1.5.35 |
+| **License** | MIT |
 
 ---
 
-## 🔥 Official Support Group
+## 🔥 Official Repository
 
 <p align="center">
-  <a href="https://m.me/j/AbayU2oh5OPVLvZm/?send_source=gc%3Acopy_invite_link_c">
-    <img src="https://img.shields.io/badge/Join%20Messenger%20Support%20Group-0084FF?style=for-the-badge&logo=messenger&logoColor=white" />
+  <a href="https://github.com/castrolmocro/WHITE-V3">
+    <img src="https://img.shields.io/badge/GitHub-castrolmocro%2FWHITE--V3-181717?style=for-the-badge&logo=github&logoColor=white" />
   </a>
 </p>
 
 ---
 
-## 📌 About This Fork
+## 📌 About WHITE V3
 
-**GOAT MESSENGER** is a custom-modified fork of [NeoKEX/Goatbot-updated](https://github.com/NeoKEX/Goatbot-updated), which itself is a fork of the original [Goat Bot V2](https://github.com/ntkhang03/Goat-Bot-V2) by **ntkhang03**.
+**WHITE V3** is an advanced Facebook Messenger bot framework built on top of the GoatBot engine — fully redesigned, extended, and maintained by **DJAMEL**.
 
-This fork adds personal configurations and improvements on top of the existing fork chain.
-
-### What This Fork Adds (by EryXenX):
-- 🎨 Custom UI configurations
-- ⚙️ Modified command handling
-- 🔧 Personal automation tweaks
-- 📦 Additional utility commands
-
-> The core engine, architecture, and all original features are entirely the work of **ntkhang03**.
+It features a powerful admin web panel, end-to-end encryption, human-like behavior simulation, multi-account rotation, MQTT health monitoring, SQLite/MongoDB database support, and hundreds of commands.
 
 ---
 
-## ⚙️ Framework Details
+## 🏗️ Bot Architecture
 
-| Component              | Description                                                              |
-| ---------------------- | ------------------------------------------------------------------------ |
-| **Original Creator**   | [ntkhang03](https://github.com/ntkhang03/Goat-Bot-V2)                    |
-| **Intermediate Fork**  | [NeoKEX/Goatbot-updated](https://github.com/NeoKEX/Goatbot-updated)     |
-| **This Fork**          | [EryXenX/GOAT-MESSENGER](https://github.com/EryXenX/GOAT-MESSENGER)     |
-| **Platform**           | Facebook Messenger                                                       |
-| **Language**           | Node.js 20.x                                                             |
+```
+WHITE-V3/
+├── index.js                   # Watchdog — auto-restart with exponential backoff
+├── Goat.js                    # Main bot bootstrap (globals, config, DB init, login)
+├── config.json                # Bot configuration (prefix, admins, database, stealth...)
+├── configCommands.json        # Per-command configuration
+├── account.txt                # Facebook AppState (cookies)
+│
+├── bot/
+│   ├── login/
+│   │   ├── login.js           # Facebook login via fca-eryxenx
+│   │   ├── loadData.js        # Database initialization
+│   │   ├── loadScripts.js     # Dynamic command/event loader
+│   │   └── socketIO.js        # Socket.IO uptime integration
+│   ├── handler/
+│   │   └── handlerEvents.js   # Core message/event dispatcher
+│   ├── stealth/               # Human-camouflage system (10 layers)
+│   ├── e2ee/                  # Liberty Protocol — Signal-based E2EE
+│   ├── autoRelogin.js         # Auto re-login on session loss
+│   ├── accountRotator.js      # Multi-account rotation
+│   ├── mqttHealthCheck.js     # MQTT connection watchdog
+│   └── keepAlive.js           # Keep-alive ping system
+│
+├── scripts/
+│   ├── cmds/                  # Bot commands (100+ commands)
+│   └── events/                # Event handlers (welcome, leave, etc.)
+│
+├── database/
+│   ├── connectDB/
+│   │   ├── connectSqlite.js   # SQLite via Sequelize
+│   │   └── connectMongoDB.js  # MongoDB via Mongoose
+│   ├── controller/            # Data-access layer (threads, users, dashboard)
+│   └── models/                # Sequelize + Mongoose models
+│
+├── dashboard/                 # Admin web dashboard (Express + ETA templates)
+│   ├── app.js                 # Dashboard server (port 3001)
+│   ├── routes/                # Register, login, forgot-password, dashboard API
+│   └── views/                 # ETA HTML templates
+│
+├── webpanel/
+│   ├── server.js              # Admin panel (port 5000) — full bot control UI
+│   ├── devhub.js              # DevHub — GitHub integration + AI assistant
+│   └── humanlike.js           # Human-like typing simulation
+│
+├── languages/                 # Localization (.lang files + cmds translations)
+├── logger/                    # Custom logger with colors and timestamps
+└── utils.js                   # Shared utilities
+```
 
 ---
 
-## 🛠 Features
+## ✨ Key Features
 
 <div align="center">
   <table>
     <tr>
-      <td align="center">🤖 Auto Reply System</td>
-      <td align="center">🎭 Welcome & Leave System</td>
+      <td align="center">🤖 100+ Bot Commands</td>
+      <td align="center">🔒 Liberty Protocol E2EE</td>
     </tr>
     <tr>
-      <td align="center">📦 Custom Commands</td>
-      <td align="center">🛡️ Admin Tools</td>
+      <td align="center">🕵️ 10-Layer Stealth Engine</td>
+      <td align="center">🔄 Multi-Account Rotation</td>
+    </tr>
+    <tr>
+      <td align="center">📊 Admin Web Panel</td>
+      <td align="center">🐙 GitHub DevHub Integration</td>
+    </tr>
+    <tr>
+      <td align="center">🛡️ Anti-Spam / Anti-Flood</td>
+      <td align="center">💾 SQLite + MongoDB Support</td>
     </tr>
     <tr>
       <td align="center">🌍 Multi-language Support</td>
-      <td align="center">⚡ Fast & Lightweight</td>
+      <td align="center">🤖 AI Development Assistant</td>
     </tr>
     <tr>
-      <td align="center">📊 Web Dashboard</td>
-      <td align="center">🔒 Secure Login System</td>
+      <td align="center">⚡ MQTT Health Watchdog</td>
+      <td align="center">🔁 Auto-Restart Watchdog</td>
     </tr>
   </table>
 </div>
 
 ---
 
-## 📹 Setup Tutorial
+## ⚙️ Setup
 
-<p align="center">
-  <a href="https://youtu.be/gPf_BFhQz_w">
-    <img src="https://img.youtube.com/vi/gPf_BFhQz_w/hqdefault.jpg" alt="Setup Tutorial" width="560" height="315" />
-  </a>
-  <br />
-  <i>Click the image above to watch the full setup guide on YouTube</i>
-</p>
+### 1. Clone the repository
+```bash
+git clone https://github.com/castrolmocro/WHITE-V3.git
+cd WHITE-V3
+```
+
+### 2. Install dependencies
+```bash
+npm install
+```
+
+### 3. Configure the bot
+
+Edit `config.json`:
+```json
+{
+  "prefix": "/",
+  "language": "en",
+  "superAdminBot": ["YOUR_FACEBOOK_ID"],
+  "database": { "type": "sqlite" }
+}
+```
+
+### 4. Add your Facebook session
+
+Paste your Facebook AppState (cookies) into `account.txt`.
+
+### 5. Start the bot
+```bash
+node index.js
+```
 
 ---
 
-## 🌐 Connect With Fork Maintainer (EryXenX)
+## 🌐 Deployment
 
-<p align="center">
-  <a href="https://facebook.com/EryXenX">
-    <img src="https://img.shields.io/badge/Facebook-1877F2?style=for-the-badge&logo=facebook&logoColor=white" />
-  </a>
-  <a href="https://t.me/EryXenX">
-    <img src="https://img.shields.io/badge/Telegram-0088CC?style=for-the-badge&logo=telegram&logoColor=white" />
-  </a>
-  <a href="https://youtube.com/@EryXenX">
-    <img src="https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white" />
-  </a>
-  <a href="https://instagram.com/EryXenX">
-    <img src="https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white" />
-  </a>
-  <a href="https://github.com/EryXenX">
-    <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" />
-  </a>
-</p>
+### Railway
+```bash
+# Set env vars on Railway:
+# PORT=5000
+# NODE_ENV=production
+```
+A `railway.toml` is included — just connect the repo and deploy.
+
+### Replit
+- Set `PORT=5000` in Replit secrets
+- The workflow `node index.js` is pre-configured
 
 ---
 
-## ✅ Full Credits & Attribution
+## 🔧 Admin Panel
 
-| Role | Person | Link |
-|------|--------|------|
-| 🏆 **Original Creator** | NTKhang (ntkhang03) | [Goat Bot V2](https://github.com/ntkhang03/Goat-Bot-V2) |
-| 🔀 **Intermediate Fork** | NeoKEX | [Goatbot-updated](https://github.com/NeoKEX/Goatbot-updated) |
-| 🔧 **This Fork** | EryXenX | [GOAT-MESSENGER](https://github.com/EryXenX/GOAT-MESSENGER) |
+Access the admin panel at:
+- **Local**: `http://localhost:5000`
+- **Railway/Replit**: your deployment URL
 
-> All core copyright and intellectual property belongs to **NTKhang (ntkhang03)**.
+Default panel password: `djamel0191tlm` (change in devhub settings)
+
+---
+
+## 📋 Configuration Reference
+
+| Key | Description |
+|-----|-------------|
+| `prefix` | Command prefix (default: `/`) |
+| `superAdminBot` | Super admin Facebook IDs |
+| `adminBot` | Admin Facebook IDs |
+| `database.type` | `"sqlite"` or `"mongodb"` |
+| `stealth.enable` | Human-camouflage system |
+| `e2ee.enable` | End-to-end encryption |
+| `accountRotation.enable` | Multi-account rotation |
+| `dashBoard.port` | Dashboard port (default: 3001) |
+
+---
+
+## 🔒 Security Features
+
+- **Liberty Protocol**: Signal-based E2EE (X3DH + Double Ratchet)
+- **Anti-Spam**: Kick users who exceed message limits
+- **Anti-Flood**: Detect and remove repeated messages
+- **Anti-Impersonation**: Block admin name spoofing
+- **Stealth Engine**: 10-layer human behavior simulation
+- **Outgoing Throttle**: Rate-limit bot responses
 
 ---
 
 ## 📄 License
 
-This project follows the original license set by **NTKhang**. See [LICENSE](./LICENSE) for full terms.
-Fork modifications do not override or replace the original license.
+MIT License — created by **DJAMEL** ([@castrolmocro](https://github.com/castrolmocro)).
 
----
-
-## 🔒 Disclaimer
-
-> This project is for **educational and personal use only**.
-> The fork maintainer (EryXenX) is not responsible for any misuse.
-> Always respect the original developer's work and contribution guidelines.
+> Do not sell or claim this project as your own.
+> © WHITE V3 created by DJAMEL — https://github.com/castrolmocro
 
 ---
 
 <div align="center">
-  ❤️ Built on the shoulders of giants. Respect Open Source. Credit your sources.
-  <br/><br/>
-  <b>Original Work © NTKhang (ntkhang03) &nbsp;|&nbsp; Fork Chain: NeoKEX → EryXenX</b>
+  <b>WHITE V3 — Created with ♥ by DJAMEL</b>
+  <br/>
+  <a href="https://github.com/castrolmocro/WHITE-V3">github.com/castrolmocro/WHITE-V3</a>
 </div>
