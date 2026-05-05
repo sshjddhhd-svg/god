@@ -2707,201 +2707,385 @@ document.addEventListener("keydown", function(e) {
 
     const body = `
 <style>
-.gh-split{display:grid;grid-template-columns:280px 1fr;gap:14px;height:calc(100vh - 200px);min-height:500px}
+/* ─── GitHub Files Page ─── */
+.ghf-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--bg2);border:1.5px solid var(--border);border-radius:14px;padding:12px 16px;margin-bottom:14px}
+.ghf-tabs{display:none;gap:6px;width:100%}
+.ghf-tab-btn{flex:1;padding:8px 0;border-radius:10px;border:1.5px solid var(--border);background:transparent;color:var(--text2);font-family:'Cairo',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .18s;text-align:center}
+.ghf-tab-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.gh-split{display:grid;grid-template-columns:285px 1fr;gap:14px;min-height:580px}
 .gh-tree{background:var(--bg2);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
-.gh-tree-list{flex:1;overflow-y:auto;padding:8px}
+.gh-tree-list{flex:1;overflow-y:auto;padding:4px 0}
 .gh-tree-list::-webkit-scrollbar{width:4px}.gh-tree-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
-.gh-file-item{padding:7px 10px;border-radius:8px;cursor:pointer;font-size:.8rem;color:var(--text2);display:flex;align-items:center;gap:8px;transition:all .15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.gh-file-item:hover{background:var(--bg4);color:var(--text)}
-.gh-file-item.active{background:rgba(99,102,241,.15);color:var(--accent2);border-left:3px solid var(--accent2)}
+/* folder row */
+.gh-folder-h{display:flex;align-items:center;gap:5px;padding:5px 10px;cursor:pointer;font-size:.79rem;font-weight:700;color:var(--text2);border-radius:8px;margin:1px 4px;transition:background .12s;user-select:none}
+.gh-folder-h:hover{background:var(--bg4);color:var(--text)}.gh-folder-h.open{color:var(--accent2)}
+.gh-farrow{font-size:.6rem;width:11px;text-align:center;flex-shrink:0}
+.gh-fcollapsed{display:none}
+/* file row */
+.gh-file-item{display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:8px;margin:1px 4px;cursor:pointer;font-size:.79rem;color:var(--text2);transition:all .12s;border-left:2px solid transparent}
+.gh-file-item:hover{background:var(--bg4);color:var(--text)}.gh-file-item.active{background:rgba(99,102,241,.14);color:var(--accent2);border-left-color:var(--accent)}
+.gh-finfo{flex:1;min-width:0}
+.gh-fname{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.8rem}
+.gh-fpath{font-size:.66rem;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px}
+.gh-sbadge{font-size:.63rem;color:var(--text3);background:var(--bg4);padding:1px 5px;border-radius:5px;flex-shrink:0;white-space:nowrap}
+.gh-match{background:rgba(251,191,36,.3);color:#fbbf24;border-radius:2px;padding:0 1px}
+/* editor */
 .gh-editor-panel{background:var(--bg2);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
-.gh-editor-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
-.gh-code{flex:1;width:100%;border:none;outline:none;background:var(--bg);color:var(--text);font-family:"Cascadia Code","Fira Code",monospace;font-size:.82rem;line-height:1.65;padding:16px;resize:none;tab-size:2}
+.gh-ed-head{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.gh-crumb{flex:1;min-width:0;font-size:.77rem;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gh-crumb b{color:var(--text)}.gh-crumb span{color:var(--border2)}
+.gh-code{flex:1;width:100%;border:none;outline:none;background:var(--bg);color:var(--text);font-family:"Cascadia Code","Fira Code","Consolas",monospace;font-size:.82rem;line-height:1.7;padding:16px;resize:none;tab-size:2;min-height:420px}
 .gh-ai-panel{background:var(--bg2);border:1.5px solid var(--border);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px;margin-top:14px}
-.gh-msg{padding:10px 14px;border-radius:10px;font-size:.83rem;line-height:1.7;margin-bottom:8px;word-break:break-word}
-.gh-msg.user{background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.2);border-radius:10px 10px 2px 10px;margin-right:auto;max-width:90%}
-.gh-msg.ai{background:var(--bg3);border:1px solid var(--border);border-radius:10px 10px 10px 2px;margin-left:auto;max-width:92%}
-.gh-chat-box{max-height:220px;overflow-y:auto;padding:4px 0}
-.gh-chat-box::-webkit-scrollbar{width:4px}.gh-chat-box::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
-@media(max-width:768px){.gh-split{grid-template-columns:1fr;height:auto}}
+.gh-msg{padding:9px 13px;border-radius:10px;font-size:.83rem;line-height:1.7;margin-bottom:6px;word-break:break-word}
+.gh-msg.user{background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.2);border-radius:10px 10px 2px 10px;max-width:90%}
+.gh-msg.ai{background:var(--bg3);border:1px solid var(--border);border-radius:10px 10px 10px 2px;max-width:92%}
+.gh-chat-box{max-height:220px;overflow-y:auto;padding:2px 0}.gh-chat-box::-webkit-scrollbar{width:4px}.gh-chat-box::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.ext-js{color:#f59e0b}.ext-json{color:#10b981}.ext-md{color:#60a5fa}.ext-sh{color:#34d399}.ext-yml{color:#a78bfa}
+@media(max-width:768px){
+  .gh-split{grid-template-columns:1fr;gap:10px}
+  .ghf-tabs{display:flex}
+  .ghp-hidden{display:none!important}
+  .gh-code{min-height:320px;font-size:.78rem}
+}
+@media(max-width:480px){.ghf-bar{padding:10px 12px;gap:6px}.gh-code{font-size:.75rem;padding:12px}}
 </style>
 
 <div class="page-header">
   <div class="page-title">🐙 مستعرض ملفات GitHub</div>
-  <div class="page-sub">تصفح وتعديل ملفات ريبو <strong style="color:#60a5fa">${owner}/${repo}</strong> مباشرةً — مع مساعد Claude AI</div>
+  <div class="page-sub">تصفح وتعديل ملفات <strong style="color:#60a5fa">${owner}/${repo}</strong> مباشرةً</div>
 </div>
 
 ${!hasToken ? `<div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:14px;margin-bottom:16px;font-size:.85rem;color:var(--red)">
 ⚠️ لم يتم إعداد GitHub Token — <a href="/devhub#sec-github" style="color:#60a5fa">اذهب لإعداد GitHub</a> أولاً.
 </div>` : ""}
 
-<!-- Settings Bar -->
-<div class="card" style="padding:12px 16px;margin-bottom:14px">
-  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-    <div style="flex:1;min-width:120px">
-      <input type="text" id="ghfOwner" class="form-control" value="${owner}" placeholder="owner" style="margin:0;font-size:.83rem"/>
-    </div>
-    <div style="flex:2;min-width:180px">
-      <input type="text" id="ghfRepo" class="form-control" value="${repo}" placeholder="repo-name" style="margin:0;font-size:.83rem"/>
-    </div>
-    <div style="flex:1;min-width:100px">
-      <input type="text" id="ghfBranch" class="form-control" value="main" placeholder="branch" style="margin:0;font-size:.83rem"/>
-    </div>
-    <button class="btn btn-primary" onclick="loadTree()">🔄 تحميل الملفات</button>
-    <input type="text" id="ghfSearch" class="form-control" placeholder="🔍 ابحث في الملفات..." oninput="filterTree(this.value)" style="flex:2;min-width:160px;margin:0;font-size:.83rem"/>
+<!-- Top Bar -->
+<div class="ghf-bar">
+  <input type="text" id="ghfOwner" class="form-control" value="${owner}" placeholder="owner" style="flex:1;min-width:80px;max-width:130px;margin:0;font-size:.82rem"/>
+  <span style="color:var(--text3);font-weight:900;flex-shrink:0">/</span>
+  <input type="text" id="ghfRepo"  class="form-control" value="${repo}"  placeholder="repo"  style="flex:2;min-width:110px;margin:0;font-size:.82rem"/>
+  <input type="text" id="ghfBranch" class="form-control" value="main" placeholder="branch" style="flex:1;min-width:60px;max-width:90px;margin:0;font-size:.82rem"/>
+  <button class="btn btn-primary" onclick="ghLoadTree()" style="white-space:nowrap;flex-shrink:0">🔄 تحميل</button>
+  <input type="text" id="ghfSearch" class="form-control" placeholder="🔍 ابحث في الملفات..." oninput="ghFilter(this.value)" style="flex:3;min-width:120px;margin:0;font-size:.82rem"/>
+  <!-- Mobile tabs (shown only on small screens) -->
+  <div class="ghf-tabs">
+    <button class="ghf-tab-btn active" id="tabBtnTree"   onclick="ghShowTab('tree')">📂 الملفات</button>
+    <button class="ghf-tab-btn"        id="tabBtnEditor" onclick="ghShowTab('editor')">✏️ المحرر</button>
   </div>
 </div>
 
+<!-- Split -->
 <div class="gh-split">
-  <!-- File Tree -->
-  <div class="gh-tree">
-    <div style="padding:10px 14px;border-bottom:1px solid var(--border);font-size:.82rem;font-weight:700;color:var(--text2);display:flex;align-items:center;justify-content:space-between">
-      <span>📂 الملفات</span>
-      <span class="badge badge-blue" id="fileCount">—</span>
+
+  <!-- Tree Panel -->
+  <div class="gh-tree" id="ghTreePanel">
+    <div style="padding:9px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:6px;flex-shrink:0">
+      <div style="display:flex;align-items:center;gap:7px;font-size:.81rem;font-weight:700;color:var(--text2)">
+        📂 <span id="ghFileCount">—</span>
+      </div>
+      <div style="display:flex;gap:4px">
+        <button class="btn btn-outline btn-sm" onclick="ghExpandAll()"   title="فتح الكل"    style="padding:3px 8px;font-size:.68rem">▾ الكل</button>
+        <button class="btn btn-outline btn-sm" onclick="ghCollapseAll()" title="إغلاق الكل"  style="padding:3px 8px;font-size:.68rem">▸ طي</button>
+      </div>
     </div>
-    <div class="gh-tree-list" id="treeList">
-      <div style="text-align:center;padding:30px;color:var(--text3);font-size:.83rem">اضغط "تحميل الملفات" للبدء</div>
+    <div class="gh-tree-list" id="ghTreeList">
+      <div style="text-align:center;padding:28px;color:var(--text3);font-size:.82rem">اضغط "تحميل" للبدء</div>
     </div>
   </div>
 
-  <!-- Editor -->
-  <div class="gh-editor-panel">
-    <div class="gh-editor-header">
-      <div style="font-size:.83rem;color:var(--text2);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1" id="ghfFilePath">لم يتم اختيار ملف</div>
-      <div style="display:flex;gap:6px;flex-shrink:0">
-        <button class="btn btn-outline btn-sm" onclick="askAIAboutFile()">🤖 اسأل Claude</button>
-        <button class="btn btn-success btn-sm" onclick="saveGhFile()">💾 حفظ لـ GitHub</button>
-        <button class="btn btn-primary btn-sm" onclick="applyAICode()">✨ طبّق كود AI</button>
+  <!-- Editor Panel -->
+  <div class="gh-editor-panel" id="ghEditorPanel">
+    <div class="gh-ed-head">
+      <div class="gh-crumb" id="ghCrumb"><span style="color:var(--text3)">اختر ملفاً من القائمة...</span></div>
+      <div style="display:flex;gap:5px;flex-shrink:0;flex-wrap:wrap">
+        <button class="btn btn-outline btn-sm" onclick="ghCopyPath()" title="نسخ المسار">📋</button>
+        <button class="btn btn-outline btn-sm" onclick="ghOpenGithub()" title="فتح في GitHub">🔗</button>
+        <button class="btn btn-outline btn-sm" onclick="ghAskAI()">🤖 Claude</button>
+        <button class="btn btn-success  btn-sm" onclick="ghSaveFile()">💾 حفظ</button>
+        <button class="btn btn-primary  btn-sm" onclick="ghApplyAI()">✨ AI</button>
       </div>
     </div>
-    <div id="ghfEditorStatus" style="padding:0 16px 6px;font-size:.78rem"></div>
-    <textarea class="gh-code" id="ghfEditor" placeholder="اختر ملفاً من القائمة..." rows="20"></textarea>
+    <div id="ghEdStatus" style="padding:0 14px 4px;font-size:.75rem;min-height:18px"></div>
+    <textarea class="gh-code" id="ghfEditor" placeholder="اختر ملفاً من القائمة..."></textarea>
   </div>
+
 </div>
 
 <!-- Claude AI Panel -->
 <div class="gh-ai-panel">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
     <div style="font-weight:700;font-size:.9rem">🤖 Claude AI — مساعد تعديل الملفات</div>
-    <button class="btn btn-outline btn-sm" onclick="clearGhChat()">🗑️ مسح</button>
+    <button class="btn btn-outline btn-sm" onclick="ghClearChat()">🗑️ مسح</button>
   </div>
   <div class="gh-chat-box" id="ghChatBox">
-    <div class="gh-msg ai">مرحباً! اختر ملفاً ثم اسألني عنه أو اطلب مني تعديله — سأكتب الكود الكامل جاهزاً للتطبيق.</div>
+    <div class="gh-msg ai">مرحباً! اختر ملفاً ثم اسألني عنه أو اطلب مني تعديله.</div>
   </div>
   <div style="display:flex;gap:8px;margin-top:4px">
-    <textarea id="ghfAiInput" class="form-control" rows="2" placeholder="اسأل عن الملف المفتوح أو اطلب تعديلاً... (Ctrl+Enter)" style="flex:1;resize:none"></textarea>
-    <button class="btn btn-primary" onclick="sendToGhAI()" style="align-self:flex-end;padding:10px 16px">🤖 أرسل</button>
+    <textarea id="ghfAiInput" class="form-control" rows="2" placeholder="اسأل عن الملف المفتوح... (Ctrl+Enter)" style="flex:1;resize:none;font-size:.83rem"></textarea>
+    <button class="btn btn-primary" onclick="ghSendAI()" style="align-self:flex-end;padding:10px 16px">🤖</button>
   </div>
-  <!-- Quick prompts -->
-  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
-    <button class="btn btn-outline btn-sm" onclick="ghQuick('اشرح لي ما يفعله هذا الملف')">📖 اشرح الملف</button>
-    <button class="btn btn-outline btn-sm" onclick="ghQuick('أضف تحسينات على هذا الكود')">⬆️ حسّن الكود</button>
-    <button class="btn btn-outline btn-sm" onclick="ghQuick('ابحث عن الأخطاء في هذا الكود وأصلحها')">🐛 أصلح الأخطاء</button>
-    <button class="btn btn-outline btn-sm" onclick="ghQuick('أضف ميزة جديدة لهذا الأمر')">➕ أضف ميزة</button>
-    <button class="btn btn-outline btn-sm" onclick="ghQuick('اكتب النسخة الكاملة المحسّنة من هذا الملف')">🔄 أعد كتابته</button>
+  <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:2px">
+    <button class="btn btn-outline btn-sm" onclick="ghQuick('اشرح لي ما يفعله هذا الملف')">📖 اشرح</button>
+    <button class="btn btn-outline btn-sm" onclick="ghQuick('أضف تحسينات على هذا الكود')">⬆️ حسّن</button>
+    <button class="btn btn-outline btn-sm" onclick="ghQuick('ابحث عن الأخطاء وأصلحها')">🐛 أصلح</button>
+    <button class="btn btn-outline btn-sm" onclick="ghQuick('أضف ميزة جديدة لهذا الأمر')">➕ ميزة</button>
+    <button class="btn btn-outline btn-sm" onclick="ghQuick('اكتب النسخة الكاملة المحسّنة')">🔄 أعد كتابة</button>
   </div>
 </div>
 
 <script>
-let _ghAllFiles = [];
-let _ghCurrentFile = null;
-let _ghLastAiCode = null;
+let _ghFiles      = [];
+let _ghCurrent    = null;
+let _ghLastAI     = null;
+let _ghSearchQ    = '';
+let _ghOpenFolders = new Set();
+let _ghMobileTab  = 'tree';
 
-async function loadTree() {
-  const owner  = document.getElementById("ghfOwner").value.trim();
-  const repo   = document.getElementById("ghfRepo").value.trim();
-  const branch = document.getElementById("ghfBranch").value.trim() || "main";
-  if (!owner || !repo) return showToast("أدخل المالك والريبو","error");
-
-  document.getElementById("treeList").innerHTML =
-    '<div style="text-align:center;padding:20px;color:var(--text3)">⏳ جارٍ التحميل...</div>';
-
-  const r = await fetch(\`/api/devhub/github/tree?owner=\${owner}&repo=\${repo}&branch=\${branch}\`);
-  const data = await r.json();
-
-  if (!data.ok) {
-    document.getElementById("treeList").innerHTML =
-      \`<div style="text-align:center;padding:20px;color:var(--red)">❌ \${data.error||"فشل التحميل"}</div>\`;
-    return showToast("❌ " + data.error, "error");
-  }
-
-  _ghAllFiles = data.files || [];
-  document.getElementById("fileCount").textContent = _ghAllFiles.length + " ملف";
-  renderTree(_ghAllFiles);
-  showToast("✅ تم تحميل " + _ghAllFiles.length + " ملف", "success");
+// ── Icon helper ───────────────────────────────────────────────────────────────
+function ghIcon(p) {
+  const e = (p.split('.').pop()||'').toLowerCase();
+  if (e==='js')  return \`<span class="ext-js">📜</span>\`;
+  if (e==='json') return \`<span class="ext-json">📋</span>\`;
+  if (e==='md')   return \`<span class="ext-md">📖</span>\`;
+  if (e==='yml'||e==='yaml') return \`<span class="ext-yml">⚙️</span>\`;
+  if (e==='sh')   return \`<span class="ext-sh">🖥️</span>\`;
+  if (e==='png'||e==='jpg'||e==='gif'||e==='svg'||e==='webp') return '🖼️';
+  if (e==='toml'||e==='ini'||e==='cfg') return '⚙️';
+  return '📄';
+}
+function ghEsc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function ghHL(text, q) {
+  if (!q) return ghEsc(text);
+  const i = text.toLowerCase().indexOf(q.toLowerCase());
+  if (i<0) return ghEsc(text);
+  return ghEsc(text.slice(0,i))+'<mark class="gh-match">'+ghEsc(text.slice(i,i+q.length))+'</mark>'+ghEsc(text.slice(i+q.length));
+}
+function ghFmtSize(b) {
+  if (!b) return '';
+  return b<1024 ? b+'B' : Math.round(b/1024*10)/10+'KB';
 }
 
-function renderTree(files) {
-  const list = document.getElementById("treeList");
-  if (!files.length) {
-    list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text3)">لا توجد ملفات</div>';
-    return;
+// ── Folder tree builder ───────────────────────────────────────────────────────
+function ghBuildTree(files) {
+  const root = { __path:'', children:{}, files:[] };
+  files.forEach(f => {
+    const parts = f.path.split('/');
+    let node = root;
+    for (let i=0; i<parts.length-1; i++) {
+      const part = parts[i];
+      if (!node.children[part]) {
+        const fp = (node.__path ? node.__path+'/'+part : part);
+        node.children[part] = { __name:part, __path:fp, children:{}, files:[] };
+      }
+      node = node.children[part];
+    }
+    node.files.push(f);
+  });
+  return root;
+}
+function ghCountDesc(node) {
+  let n = node.files.length;
+  Object.values(node.children).forEach(c => { n += ghCountDesc(c); });
+  return n;
+}
+function ghHasMatch(node, q) {
+  if (node.files.some(f => f.path.toLowerCase().includes(q))) return true;
+  return Object.values(node.children).some(c => ghHasMatch(c, q));
+}
+
+function ghRenderNode(node, depth, q) {
+  const sq = q ? q.toLowerCase() : '';
+  let html = '';
+  const folders = Object.values(node.children).sort((a,b)=>a.__name.localeCompare(b.__name));
+  for (const folder of folders) {
+    if (sq && !ghHasMatch(folder, sq)) continue;
+    const fc = ghCountDesc(folder);
+    const isOpen = sq ? true : _ghOpenFolders.has(folder.__path);
+    const fpId = 'ghf_'+folder.__path.replace(/[^a-zA-Z0-9]/g,'_');
+    html += \`<div class="gh-folder-h\${isOpen?' open':''}" onclick="ghToggleFolder('\${ghEsc(folder.__path)}')" style="padding-right:\${depth*14+6}px">
+      <span class="gh-farrow">\${isOpen?'▾':'▸'}</span>
+      <span style="flex-shrink:0;font-size:.88rem">📁</span>
+      <span class="gh-fname" style="flex:1">\${ghHL(folder.__name,q)}</span>
+      <span class="gh-sbadge" style="background:rgba(99,102,241,.1);color:var(--accent3)">\${fc}</span>
+    </div>
+    <div id="\${fpId}" class="\${isOpen?'':'gh-fcollapsed'}">\${ghRenderNode(folder, depth+1, q)}</div>\`;
   }
-  const iconFor = p => {
-    if (p.endsWith(".js"))   return "📜";
-    if (p.endsWith(".json")) return "📋";
-    if (p.endsWith(".md"))   return "📖";
-    if (p.endsWith(".yml") || p.endsWith(".yaml")) return "⚙️";
-    if (p.endsWith(".sh"))   return "🖥️";
-    return "📄";
-  };
-  list.innerHTML = files.map(f => {
-    const parts = f.path.split("/");
-    const name  = parts[parts.length - 1];
-    const dir   = parts.slice(0, -1).join("/");
-    const indent = (parts.length - 1) * 12;
-    const isActive = _ghCurrentFile === f.path;
-    return \`<div class="gh-file-item \${isActive?"active":""}" onclick="openGhFile('\${f.path}')"
-      title="\${f.path}" style="padding-right:\${indent}px">
-      <span style="flex-shrink:0">\${iconFor(f.path)}</span>
-      <span style="overflow:hidden;text-overflow:ellipsis">\${name}</span>
-      \${f.size ? '<span style="font-size:.68rem;color:var(--text3);margin-right:auto;flex-shrink:0">'+Math.round(f.size/1024*10)/10+'KB</span>' : ''}
+  const files = [...node.files].sort((a,b)=>a.path.localeCompare(b.path));
+  for (const f of files) {
+    if (sq && !f.path.toLowerCase().includes(sq)) continue;
+    const name = f.path.split('/').pop();
+    const isActive = _ghCurrent === f.path;
+    html += \`<div class="gh-file-item\${isActive?' active':''}" onclick="ghOpenFile(this.dataset.fp)" data-fp="\${ghEsc(f.path)}" title="\${ghEsc(f.path)}" style="padding-right:\${depth*14+8}px">
+      <span style="flex-shrink:0;font-size:.85rem">\${ghIcon(f.path)}</span>
+      <div class="gh-finfo">
+        <div class="gh-fname">\${ghHL(name,q)}</div>
+        \${depth===0&&f.path.includes('/')?'<div class="gh-fpath">'+ghEsc(f.path.split('/').slice(0,-1).join('/'))+'</div>':''}
+      </div>
+      \${f.size?'<span class="gh-sbadge">'+ghFmtSize(f.size)+'</span>':''}
     </div>\`;
-  }).join("");
+  }
+  return html || (depth===0 ? '<div style="text-align:center;padding:20px;color:var(--text3)">لا توجد ملفات</div>' : '');
 }
 
-function filterTree(q) {
-  const s = q.toLowerCase();
-  renderTree(s ? _ghAllFiles.filter(f => f.path.toLowerCase().includes(s)) : _ghAllFiles);
+function ghRenderTree() {
+  const root = ghBuildTree(_ghFiles);
+  document.getElementById('ghTreeList').innerHTML = ghRenderNode(root, 0, _ghSearchQ);
 }
 
-async function openGhFile(filePath) {
-  const owner  = document.getElementById("ghfOwner").value.trim();
-  const repo   = document.getElementById("ghfRepo").value.trim();
-  const branch = document.getElementById("ghfBranch").value.trim() || "main";
+// ── Tree controls ─────────────────────────────────────────────────────────────
+async function ghLoadTree() {
+  const owner  = document.getElementById('ghfOwner').value.trim();
+  const repo   = document.getElementById('ghfRepo').value.trim();
+  const branch = document.getElementById('ghfBranch').value.trim() || 'main';
+  if (!owner || !repo) return showToast('أدخل المالك والريبو','error');
+  document.getElementById('ghTreeList').innerHTML = '<div style="text-align:center;padding:24px;color:var(--text3)">⏳ جارٍ التحميل...</div>';
+  document.getElementById('ghFileCount').textContent = '...';
+  const r    = await fetch(\`/api/devhub/github/tree?owner=\${encodeURIComponent(owner)}&repo=\${encodeURIComponent(repo)}&branch=\${encodeURIComponent(branch)}\`);
+  const data = await r.json();
+  if (!data.ok) {
+    document.getElementById('ghTreeList').innerHTML = \`<div style="text-align:center;padding:24px;color:var(--red)">❌ \${data.error||'فشل التحميل'}</div>\`;
+    return showToast('❌ '+(data.error||'فشل'), 'error');
+  }
+  _ghFiles = data.files || [];
+  // auto-open top-level folders
+  _ghOpenFolders.clear();
+  _ghFiles.forEach(f => { const top = f.path.split('/')[0]; if (f.path.includes('/')) _ghOpenFolders.add(top); });
+  document.getElementById('ghFileCount').textContent = _ghFiles.length + ' ملف';
+  _ghSearchQ = ''; document.getElementById('ghfSearch').value = '';
+  ghRenderTree();
+  showToast('✅ تم تحميل '+_ghFiles.length+' ملف','success');
+}
 
-  _ghCurrentFile = filePath;
-  document.getElementById("ghfFilePath").textContent = filePath;
-  document.getElementById("ghfEditor").value = "⏳ جارٍ التحميل...";
-  document.getElementById("ghfEditorStatus").innerHTML = "";
-  renderTree(_ghAllFiles); // تحديث اختيار الملف
+function ghFilter(q) { _ghSearchQ = q; ghRenderTree(); }
 
-  const r = await fetch(\`/api/devhub/github/file?owner=\${owner}&repo=\${repo}&branch=\${branch}&path=\${encodeURIComponent(filePath)}\`);
+function ghToggleFolder(fp) {
+  _ghOpenFolders.has(fp) ? _ghOpenFolders.delete(fp) : _ghOpenFolders.add(fp);
+  ghRenderTree();
+}
+function ghExpandAll() {
+  _ghFiles.forEach(f => {
+    const parts = f.path.split('/'); let p='';
+    for (let i=0;i<parts.length-1;i++) { p = p ? p+'/'+parts[i] : parts[i]; _ghOpenFolders.add(p); }
+  });
+  ghRenderTree();
+}
+function ghCollapseAll() { _ghOpenFolders.clear(); ghRenderTree(); }
+
+// ── Mobile tab ────────────────────────────────────────────────────────────────
+function ghShowTab(tab) {
+  _ghMobileTab = tab;
+  document.getElementById('tabBtnTree').classList.toggle('active', tab==='tree');
+  document.getElementById('tabBtnEditor').classList.toggle('active', tab==='editor');
+  if (window.innerWidth <= 768) {
+    document.getElementById('ghTreePanel').classList.toggle('ghp-hidden', tab!=='tree');
+    document.getElementById('ghEditorPanel').classList.toggle('ghp-hidden', tab!=='editor');
+  }
+}
+window.addEventListener('resize', () => {
+  if (window.innerWidth > 768) {
+    document.getElementById('ghTreePanel').classList.remove('ghp-hidden');
+    document.getElementById('ghEditorPanel').classList.remove('ghp-hidden');
+  } else { ghShowTab(_ghMobileTab); }
+});
+
+// ── File actions ──────────────────────────────────────────────────────────────
+async function ghOpenFile(filePath) {
+  const owner  = document.getElementById('ghfOwner').value.trim();
+  const repo   = document.getElementById('ghfRepo').value.trim();
+  const branch = document.getElementById('ghfBranch').value.trim() || 'main';
+  _ghCurrent = filePath;
+  // breadcrumb
+  const parts = filePath.split('/');
+  document.getElementById('ghCrumb').innerHTML = parts.map((p,i) =>
+    i===parts.length-1 ? \`<b>\${ghEsc(p)}</b>\` : \`<span>\${ghEsc(p)}</span> <span style="color:var(--border2);margin:0 2px">/</span> \`
+  ).join('');
+  document.getElementById('ghfEditor').value = '⏳ جارٍ التحميل...';
+  document.getElementById('ghEdStatus').innerHTML = '';
+  ghRenderTree(); // update active highlight
+  if (window.innerWidth <= 768) ghShowTab('editor');
+  const r    = await fetch(\`/api/devhub/github/file?owner=\${encodeURIComponent(owner)}&repo=\${encodeURIComponent(repo)}&branch=\${encodeURIComponent(branch)}&path=\${encodeURIComponent(filePath)}\`);
+  const data = await r.json();
+  if (data.ok) { document.getElementById('ghfEditor').value = data.content; showToast('📂 '+parts.pop(),'info'); }
+  else          { document.getElementById('ghfEditor').value = ''; showToast('❌ '+(data.error||'فشل'),'error'); }
+}
+
+async function ghSaveFile() {
+  if (!_ghCurrent) return showToast('اختر ملفاً أولاً','error');
+  const owner   = document.getElementById('ghfOwner').value.trim();
+  const repo    = document.getElementById('ghfRepo').value.trim();
+  const branch  = document.getElementById('ghfBranch').value.trim() || 'main';
+  const content = document.getElementById('ghfEditor').value;
+  const commitMsg = prompt('رسالة الـ commit:', '✏️ تعديل: '+_ghCurrent.split('/').pop());
+  if (commitMsg === null) return;
+  const st = document.getElementById('ghEdStatus');
+  st.innerHTML = '<span style="color:var(--text3)">⏳ جارٍ الحفظ...</span>';
+  const r    = await fetch('/api/devhub/github/file', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ owner, repo, branch, path:_ghCurrent, content, commitMsg })
+  });
   const data = await r.json();
   if (data.ok) {
-    document.getElementById("ghfEditor").value = data.content;
-    showToast("📂 " + filePath.split("/").pop(), "info");
+    st.innerHTML = \`<span style="color:var(--green)">✅ حُفظ — \${new Date().toLocaleTimeString('ar')}</span> <a href="\${data.url}" target="_blank" style="color:#60a5fa;font-size:.73rem;margin-right:6px">🔗 GitHub</a>\`;
+    showToast('✅ تم الحفظ!','success');
   } else {
-    document.getElementById("ghfEditor").value = "";
-    showToast("❌ " + data.error, "error");
+    st.innerHTML = \`<span style="color:var(--red)">❌ \${data.error}</span>\`;
+    showToast('❌ '+(data.error||'فشل'),'error');
   }
 }
 
-async function saveGhFile() {
-  if (!_ghCurrentFile) return showToast("اختر ملفاً أولاً","error");
-  const owner    = document.getElementById("ghfOwner").value.trim();
-  const repo     = document.getElementById("ghfRepo").value.trim();
-  const branch   = document.getElementById("ghfBranch").value.trim() || "main";
-  const content  = document.getElementById("ghfEditor").value;
-  const commitMsg = prompt("رسالة الـ commit:", "✏️ تعديل: " + _ghCurrentFile.split("/").pop());
-  if (commitMsg === null) return;
+function ghCopyPath() {
+  if (!_ghCurrent) return showToast('اختر ملفاً أولاً','error');
+  navigator.clipboard?.writeText(_ghCurrent)
+    .then(()=>showToast('📋 تم نسخ: '+_ghCurrent,'success'))
+    .catch(()=>{ const el=document.createElement('input'); el.value=_ghCurrent; document.body.appendChild(el); el.select(); document.execCommand('copy'); el.remove(); showToast('📋 تم نسخ المسار','success'); });
+}
+function ghOpenGithub() {
+  if (!_ghCurrent) return showToast('اختر ملفاً أولاً','error');
+  const o=document.getElementById('ghfOwner').value.trim(), r=document.getElementById('ghfRepo').value.trim(), b=document.getElementById('ghfBranch').value.trim()||'main';
+  window.open(\`https://github.com/\${o}/\${r}/blob/\${b}/\${_ghCurrent}\`,'_blank');
+}
 
-  const st = document.getElementById("ghfEditorStatus");
-  st.innerHTML = '<span style="color:var(--text3)">⏳ جارٍ الحفظ على GitHub...</span>';
+// ── Claude AI ─────────────────────────────────────────────────────────────────
+async function ghSendAI() {
+  const msg = document.getElementById('ghfAiInput').value.trim();
+  if (!msg) return;
+  const editor  = document.getElementById('ghfEditor').value;
+  const fileCtx = _ghCurrent && editor ? \`\n\nالملف المفتوح: \${_ghCurrent}\n\\\`\\\`\\\`javascript\n\${editor.slice(0,5000)}\n\\\`\\\`\\\`\` : '';
+  document.getElementById('ghfAiInput').value = '';
+  const box = document.getElementById('ghChatBox');
+  box.insertAdjacentHTML('beforeend',\`<div class="gh-msg user">\${ghEsc(msg)}</div>\`);
+  box.insertAdjacentHTML('beforeend',\`<div class="gh-msg ai" id="ghAiStream"><span style="color:var(--text3)">⏳ Claude يفكر...</span></div>\`);
+  box.scrollTop = box.scrollHeight;
+  try {
+    const r    = await fetch('/api/devhub/ai/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg+fileCtx})});
+    const data = await r.json();
+    const reply = data.reply||data.error||'لم يتم الحصول على رد';
+    const el = document.getElementById('ghAiStream');
+    if (el) {
+      const codeMatch = reply.match(/\`\`\`(?:javascript|js)?\\n([\\s\\S]*?)\`\`\`/);
+      if (codeMatch) {
+        _ghLastAI = codeMatch[1];
+        el.innerHTML = reply.replace(/\`\`\`(?:javascript|js)?\\n([\\s\\S]*?)\`\`\`/g,
+          '<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;margin:6px 0;font-family:monospace;font-size:.78rem;overflow-x:auto;white-space:pre">$1</div>');
+      } else { el.textContent = reply; }
+    }
+    box.scrollTop = box.scrollHeight;
+  } catch(e) {
+    const el = document.getElementById('ghAiStream');
+    if (el) el.innerHTML = \`<span style="color:var(--red)">❌ \${e.message}</span>\`;
+  }
+}
+function ghQuick(q) { document.getElementById('ghfAiInput').value = q; ghSendAI(); }
+function ghAskAI()  { if (!_ghCurrent) return showToast('اختر ملفاً أولاً','error'); document.getElementById('ghfAiInput').value='اشرح لي هذا الملف وما يفعله بالتفصيل'; ghSendAI(); }
+function ghApplyAI(){ if (!_ghLastAI) return showToast('لا يوجد كود من AI بعد','error'); if(!confirm('تطبيق كود AI على المحرر؟')) return; document.getElementById('ghfEditor').value=_ghLastAI; showToast('✅ تم تطبيق كود AI — اضغط حفظ','success'); }
+function ghClearChat(){ document.getElementById('ghChatBox').innerHTML='<div class="gh-msg ai">مرحباً! اختر ملفاً ثم اسألني عنه.</div>'; _ghLastAI=null; }
 
-  const r = await fetch("/api/devhub/github/file", {
-    method:"POST", headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({ owner, repo, branch, path: _ghCurrentFile, content, commitMsg })
+document.getElementById('ghfAiInput').addEventListener('keydown', e => {
+  if (e.ctrlKey && e.key==='Enter') { e.preventDefault(); ghSendAI(); }
+});
+
+${hasToken ? "ghLoadTree();" : ""}
+</script>`;
   });
   const data = await r.json();
   if (data.ok) {
