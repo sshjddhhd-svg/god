@@ -2698,6 +2698,125 @@ document.addEventListener("keydown", function(e) {
     } catch (e) { res.json({ error: e.message }); }
   });
 
+  // ── AI: Generate Command Code ─────────────────────────────────────────────────
+  app.post("/api/devhub/ai/generate-command", auth, async (req, res) => {
+    try {
+      const { description, name } = req.body;
+      if (!description) return res.json({ error: "وصف الأمر مطلوب" });
+
+      // Read 2 small real commands as structure examples
+      const cmdsDir = path.join(__dirname, "../scripts/cmds");
+      let exampleCode = "";
+      for (const f of ["admin.js", "help.js", "say.js"]) {
+        try {
+          const raw = fs.readFileSync(path.join(cmdsDir, f), "utf8").slice(0, 600);
+          exampleCode += `// === ${f} (excerpt) ===\n${raw}\n\n`;
+          if (exampleCode.length > 1200) break;
+        } catch(_) {}
+      }
+
+      const sysPrompt = `أنت مطور GoatBot محترف. اكتب أمر GoatBot كامل وجاهز للتشغيل بـ Node.js.
+
+=== القالب الإلزامي ===
+module.exports = {
+  config: {
+    name: "cmdname",        // اسم الأمر
+    aliases: [],            // أسماء بديلة
+    version: "1.0",
+    author: "DJAMEL",
+    countDown: 5,
+    role: 0,                // 0=الجميع 1=مشرف_مجموعة 2=مشرف_بوت
+    shortDescription: "...",
+    longDescription: "...",
+    category: "custom",
+    guide: { en: "{pn}cmdname [args]" }
+  },
+  onStart: async function({ api, event, args, message, prefix }) {
+    const { threadID, messageID, senderID } = event;
+    // الكود هنا
+    await message.reply("مرحباً!");
+  }
+};
+
+=== APIs المتاحة ===
+- message.reply(text) — رد على الرسالة
+- message.reply({ body: text, attachment: stream }) — رد مع ملف
+- api.sendMessage(text, threadID) — إرسال رسالة
+- args — مصفوفة المعطيات
+- event.threadID, event.messageID, event.senderID, event.type
+- prefix — البادئة
+
+=== قواعد صارمة ===
+- اكتب module.exports كاملاً من السطر الأول للأخير
+- لا تضيف شرحاً خارج الكود
+- استخدم فقط: require('axios'), require('fs-extra'), require('path')
+- لا TypeScript, لا ES modules (import/export)
+- الكود يعمل مباشرة بدون تعديل`;
+
+      const userMsg = `اكتب أمر GoatBot كامل بالمواصفات التالية:\nالاسم: ${(name||"custom").replace(/[^a-zA-Z0-9_\-]/g,"")}\nالوصف: ${description}\n\nاكتب الكود الكامل فقط داخل بلوك \`\`\`javascript`;
+
+      const reply = await callAI("openai", [
+        { role: "system", content: sysPrompt },
+        { role: "user",   content: userMsg }
+      ]);
+
+      const match = reply.match(/```(?:javascript|js)?\n([\s\S]*?)```/);
+      const code  = match ? match[1].trim() : reply.trim();
+      res.json({ ok: true, code });
+    } catch (e) { res.json({ error: e.message }); }
+  });
+
+  // ── Create, Hot-Load & Push Command ──────────────────────────────────────────
+  app.post("/api/devhub/create-command", auth, async (req, res) => {
+    try {
+      const cfg   = loadCfg();
+      const token = loadToken();
+      const { name, code, pushToGithub, owner, repo, branch } = req.body;
+      if (!name || !code) return res.json({ error: "الاسم والكود مطلوبان" });
+
+      const safeName = name.replace(/[^a-zA-Z0-9_\-]/g, "").toLowerCase();
+      if (!safeName) return res.json({ error: "اسم غير صالح" });
+
+      const filePath = path.join(__dirname, "../scripts/cmds", safeName + ".js");
+      fs.writeFileSync(filePath, code, "utf8");
+
+      // Hot-load into running bot
+      let hotLoaded  = false;
+      let loadedName = safeName;
+      if (global.GoatBot?.commands) {
+        try {
+          delete require.cache[require.resolve(filePath)];
+          const mod = require(filePath);
+          const cmdCfg = mod.config || mod.module?.exports?.config;
+          if (cmdCfg?.name) {
+            loadedName = cmdCfg.name;
+            global.GoatBot.commands.delete(cmdCfg.name);
+            global.GoatBot.commands.set(cmdCfg.name, mod);
+            hotLoaded = true;
+          }
+        } catch (err) {
+          return res.json({ error: "خطأ في الكود: " + err.message, saved: true });
+        }
+      }
+
+      // Push to GitHub
+      let githubUrl = null;
+      if (pushToGithub && token) {
+        try {
+          const ghOwner  = owner  || cfg.baseOwner || "castrolmocro";
+          const ghRepo   = repo   || cfg.baseRepo  || "WHITE-V3";
+          const ghBranch = branch || "main";
+          const ghPath   = `scripts/cmds/${safeName}.js`;
+          await pushFile(token, ghOwner, ghRepo, ghPath, code, ghBranch,
+            `✨ WHITE V3 RELEASE — أمر جديد: /${loadedName}`);
+          githubUrl = `https://github.com/${ghOwner}/${ghRepo}/blob/${ghBranch}/${ghPath}`;
+        } catch(_) {}
+      }
+
+      res.json({ ok: true, name: loadedName, file: `scripts/cmds/${safeName}.js`, hotLoaded, githubUrl });
+    } catch (e) { res.json({ error: e.message }); }
+  });
+
   // ── GitHub File Browser Page ──────────────────────────────────────────────────
   app.get("/github-files", auth, (req, res) => {
     const cfg      = loadCfg();
@@ -2831,6 +2950,56 @@ ${!hasToken ? `<div style="background:rgba(239,68,68,.08);border:1px solid rgba(
     <button class="btn btn-outline btn-sm" onclick="ghQuick('أضف ميزة جديدة لهذا الأمر')">➕ ميزة</button>
     <button class="btn btn-outline btn-sm" onclick="ghQuick('اكتب النسخة الكاملة المحسّنة')">🔄 أعد كتابة</button>
   </div>
+</div>
+
+<!-- ── Create New Command Panel ────────────────────────────────────────── -->
+<div class="gh-ai-panel" style="border-color:rgba(16,185,129,.25);margin-top:14px">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+    <div style="font-weight:700;font-size:.92rem">🆕 إنشاء أمر جديد بـ AI</div>
+    <span style="font-size:.7rem;color:var(--green);background:rgba(16,185,129,.08);padding:3px 10px;border-radius:8px;border:1px solid rgba(16,185,129,.2)">⚡ يشتغل فوراً دون إيقاف البوت</span>
+  </div>
+
+  <div id="mcStep1" style="display:flex;flex-direction:column;gap:8px">
+    <div style="display:flex;gap:8px;align-items:center">
+      <span style="font-size:.8rem;color:var(--text2);font-weight:700;flex-shrink:0">اسم الأمر:</span>
+      <input type="text" id="mcName" class="form-control" placeholder="مثال: weather أو greet أو stats"
+        style="flex:1;margin:0;font-size:.82rem;font-family:monospace;max-width:200px"/>
+    </div>
+    <textarea id="mcDesc" class="form-control" rows="2"
+      placeholder="ماذا يفعل الأمر؟ مثال: يرد على المستخدم بترحيب شخصي ويعرض اسمه..."
+      style="resize:vertical;font-size:.83rem"></textarea>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="mcGenerate()" id="mcGenBtn" style="flex:1;min-width:160px">🤖 AI يكتب الكود</button>
+      <button class="btn btn-outline btn-sm" onclick="mcQuick('يرد بترحيب شخصي مع اسم المستخدم')">👋</button>
+      <button class="btn btn-outline btn-sm" onclick="mcQuick('يرسل صورة عشوائية من الإنترنت')">🖼️</button>
+      <button class="btn btn-outline btn-sm" onclick="mcQuick('يُحصي رسائل كل مستخدم في المجموعة ويرتبهم')">📊</button>
+      <button class="btn btn-outline btn-sm" onclick="mcQuick('يتنبأ بشيء ما بشكل عشوائي مضحك')">🔮</button>
+      <button class="btn btn-outline btn-sm" onclick="mcQuick('يلعب لعبة خمن الرقم مع المستخدم')">🎮</button>
+    </div>
+  </div>
+
+  <div id="mcStep2" style="display:none;flex-direction:column;gap:8px;margin-top:8px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
+      <span style="font-size:.79rem;font-weight:700;color:var(--text2)">📜 الكود المولّد — راجع وعدّل إن أردت:</span>
+      <div style="display:flex;gap:5px">
+        <button class="btn btn-outline btn-sm" onclick="mcRegenerate()">🔄 أعد</button>
+        <button class="btn btn-outline btn-sm" onclick="mcCopyCode()">📋 نسخ</button>
+      </div>
+    </div>
+    <textarea id="mcCode" class="gh-code" rows="14"
+      style="min-height:260px;border:1.5px solid rgba(16,185,129,.2);border-radius:10px;font-size:.79rem"></textarea>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button class="btn btn-success" onclick="mcDeploy()" id="mcDeployBtn" style="flex:1;min-width:200px;padding:10px">
+        💾 حفظ وتشغيل فوراً في البوت
+      </button>
+      <label style="display:flex;align-items:center;gap:6px;font-size:.8rem;cursor:pointer;color:var(--text2);flex-shrink:0">
+        <input type="checkbox" id="mcPushGH" checked style="width:14px;height:14px"/>
+        رفع للـ GitHub
+      </label>
+    </div>
+  </div>
+
+  <div id="mcStatus" style="font-size:.77rem;min-height:20px;margin-top:4px"></div>
 </div>
 
 <script>
@@ -3083,6 +3252,85 @@ function ghClearChat(){ document.getElementById('ghChatBox').innerHTML='<div cla
 document.getElementById('ghfAiInput').addEventListener('keydown', e => {
   if (e.ctrlKey && e.key==='Enter') { e.preventDefault(); ghSendAI(); }
 });
+
+// ── Create Command Functions ──────────────────────────────────────────────────
+async function mcGenerate() {
+  const name = (document.getElementById('mcName').value.trim().replace(/[^a-zA-Z0-9_\\-]/g,'')||'custom').toLowerCase();
+  const desc = document.getElementById('mcDesc').value.trim();
+  if (!desc) return showToast('اكتب وصف الأمر أولاً','error');
+  const btn = document.getElementById('mcGenBtn');
+  btn.disabled = true; btn.textContent = '⏳ AI يكتب...';
+  document.getElementById('mcStatus').innerHTML = '<span style="color:var(--text3)">⏳ الذكاء الاصطناعي يكتب الكود... (15-30 ثانية)</span>';
+  try {
+    const r = await fetch('/api/devhub/ai/generate-command', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ name, description: desc })
+    });
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'فشل التوليد');
+    document.getElementById('mcCode').value = d.code;
+    document.getElementById('mcStep2').style.display = 'flex';
+    document.getElementById('mcStatus').innerHTML = '<span style="color:var(--green)">✅ تم توليد الكود — راجعه وانقر "حفظ وتشغيل"</span>';
+    document.getElementById('mcStep2').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  } catch(e) {
+    document.getElementById('mcStatus').innerHTML = '<span style="color:var(--red)">❌ ' + e.message + '</span>';
+  } finally {
+    btn.disabled = false; btn.textContent = '🤖 AI يكتب الكود';
+  }
+}
+
+async function mcDeploy() {
+  const name   = (document.getElementById('mcName').value.trim().replace(/[^a-zA-Z0-9_\\-]/g,'')||'custom').toLowerCase();
+  const code   = document.getElementById('mcCode').value.trim();
+  const pushGH = document.getElementById('mcPushGH').checked;
+  const owner  = document.getElementById('ghfOwner').value.trim();
+  const repo   = document.getElementById('ghfRepo').value.trim();
+  const branch = document.getElementById('ghfBranch').value.trim() || 'main';
+  if (!code) return showToast('لا يوجد كود','error');
+  const btn = document.getElementById('mcDeployBtn');
+  btn.disabled = true; btn.textContent = '⏳ جارٍ الحفظ...';
+  document.getElementById('mcStatus').innerHTML = '<span style="color:var(--text3)">⏳ جارٍ حفظ الأمر وتشغيله في البوت...</span>';
+  try {
+    const r = await fetch('/api/devhub/create-command', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ name, code, pushToGithub: pushGH, owner, repo, branch })
+    });
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'فشل الحفظ');
+    let s = '<span style="color:var(--green)">✅ الأمر <strong>/' + d.name + '</strong> يعمل الآن في البوت!';
+    if (d.hotLoaded) s += ' ⚡ تحميل فوري';
+    s += '</span>';
+    if (d.githubUrl) s += '&nbsp;<a href="' + d.githubUrl + '" target="_blank" style="color:#60a5fa;font-size:.73rem">🔗 GitHub</a>';
+    document.getElementById('mcStatus').innerHTML = s;
+    showToast('✅ الأمر /' + d.name + ' يعمل الآن!', 'success');
+    fetch('/api/commands').catch(function(){});
+    if (_ghFiles.length) setTimeout(function(){ ghLoadTree(); }, 1500);
+  } catch(e) {
+    document.getElementById('mcStatus').innerHTML = '<span style="color:var(--red)">❌ ' + e.message + '</span>';
+    showToast('❌ ' + e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = '💾 حفظ وتشغيل فوراً في البوت';
+  }
+}
+
+function mcRegenerate() {
+  document.getElementById('mcStep2').style.display = 'none';
+  mcGenerate();
+}
+function mcCopyCode() {
+  var code = document.getElementById('mcCode').value;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(code).then(function(){ showToast('📋 تم نسخ الكود','success'); });
+  } else {
+    var el = document.createElement('textarea'); el.value = code;
+    document.body.appendChild(el); el.select(); document.execCommand('copy'); el.remove();
+    showToast('📋 تم نسخ الكود','success');
+  }
+}
+function mcQuick(desc) {
+  document.getElementById('mcDesc').value = desc;
+  document.getElementById('mcStatus').innerHTML = '';
+}
 
 ${hasToken ? "ghLoadTree();" : ""}
 </script>`;
