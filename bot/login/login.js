@@ -99,7 +99,7 @@ for (const t of subTitleArray) {
   centerText(textColor2, t.length);
 }
 centerText(gradient('#9F98E8', "#AFF6CF")("Created by DJAMEL with ♡"), "Created by DJAMEL with ♡".length);
-centerText(gradient('#9F98E8', '#AFF6CF')("Source code: https://github.com/castrolmocro/New-white-e2ee-v2"), "Source code: https://github.com/castrolmocro/New-white-e2ee-v2".length);
+centerText(gradient('#9F98E8', '#AFF6CF')("Source code: https://github.com/castrolmocro/WHITE-V3"), "Source code: https://github.com/castrolmocro/WHITE-V3".length);
 centerText(gradient("#f5af19", '#f12711')("ALL VERSIONS NOT RELEASED HERE ARE FAKE"), "ALL VERSIONS NOT RELEASED HERE ARE FAKE".length);
 let widthConsole = process.stdout.columns;
 if (widthConsole > 0x32) {
@@ -642,7 +642,7 @@ async function startBot(_0x3cad9e) {
       let _0x4d48d2 = '';
       // ✅ FIX 2: Notification fetch fail হলে process.exit() করবে না, বট চালু থাকবে
       try {
-        const _0x4c818f = await axios.get("https://raw.githubusercontent.com/castrolmocro/New-white-e2ee-v2/main/notification.txt").catch(() => ({ data: '' }));
+        const _0x4c818f = await axios.get("https://raw.githubusercontent.com/castrolmocro/WHITE-V3/main/notification.txt").catch(() => ({ data: '' }));
         _0x4d48d2 = _0x4c818f.data;
       } catch (_0x106e88) {
         // ✅ FIX 2: আগে এখানে process.exit() ছিল — এখন শুধু warning দিয়ে চালু থাকবে
