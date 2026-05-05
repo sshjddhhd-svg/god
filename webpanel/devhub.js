@@ -13,7 +13,7 @@ const PANEL_CFG  = path.join(__dirname, "panel-config.json");
 // ─── Config helpers ───────────────────────────────────────────────────────────
 function loadCfg() {
   try { return JSON.parse(fs.readFileSync(CFG_FILE, "utf8")); }
-  catch (_) { return { githubTokenEnc: "", baseRepo: "New-white-e2ee-v2", baseOwner: "castrolmocro", models: ["openai","mistral","llama"], conversationHistory: [] }; }
+  catch (_) { return { githubTokenEnc: "", baseRepo: "WHITE-V3", baseOwner: "castrolmocro", models: ["openai","mistral","llama"], conversationHistory: [] }; }
 }
 function saveCfg(c) { fs.writeFileSync(CFG_FILE, JSON.stringify(c, null, 2)); }
 
@@ -1138,7 +1138,7 @@ input:checked + .ctx-slider:before{transform:translateX(18px);background:var(--g
   <div class="form-grid">
     <div class="form-group">
       <label class="form-label">📁 الريبو</label>
-      <input type="text" id="pushAllRepo" class="form-control" value="${loadCfg().baseRepo || "New-white-e2ee-v2"}"/>
+      <input type="text" id="pushAllRepo" class="form-control" value="${loadCfg().baseRepo || "WHITE-V3"}"/>
     </div>
     <div class="form-group">
       <label class="form-label">👤 المالك</label>
@@ -1247,7 +1247,7 @@ input:checked + .ctx-slider:before{transform:translateX(18px);background:var(--g
     </div>
     <div class="form-group">
       <label class="form-label">📁 الريبو الأصلي</label>
-      <input type="text" id="sdBaseRepo" class="form-control" value="${loadCfg().baseRepo || "New-white-e2ee-v2"}"/>
+      <input type="text" id="sdBaseRepo" class="form-control" value="${loadCfg().baseRepo || "WHITE-V3"}"/>
     </div>
     <div class="form-group">
       <label class="form-label">📊 أقصى إصدارات</label>
@@ -2518,7 +2518,7 @@ document.addEventListener("keydown", function(e) {
       if (!token) return res.json({ error: "أضف GitHub token أولاً" });
       const cfg = loadCfg();
       const owner = req.body.owner || cfg.baseOwner || "castrolmocro";
-      const repo = req.body.repo || cfg.baseRepo || "New-white-e2ee-v2";
+      const repo = req.body.repo || cfg.baseRepo || "WHITE-V3";
       const branch = req.body.branch || "main";
       const commitMsg = req.body.commitMsg || "🚀 Push from WHITE V3 Panel";
       const remote = `https://${token}@github.com/${owner}/${repo}.git`;
@@ -2548,7 +2548,7 @@ document.addEventListener("keydown", function(e) {
       if (!token) return res.json({ error: "أضف GitHub token أولاً" });
       const cfg = loadCfg();
       const owner = req.body.owner || cfg.baseOwner || "castrolmocro";
-      const repo = req.body.repo || cfg.baseRepo || "New-white-e2ee-v2";
+      const repo = req.body.repo || cfg.baseRepo || "WHITE-V3";
       const branch = req.body.branch || "main";
       const commitMsg = req.body.commitMsg || "🚀 Full push from WHITE V3 Panel";
       const remote = `https://${token}@github.com/${owner}/${repo}.git`;
@@ -2594,7 +2594,7 @@ document.addEventListener("keydown", function(e) {
       if (!token) return res.json({ error: "أضف GitHub token أولاً" });
       const { files, branchOrRepo, commitMsg, mode } = req.body;
       const owner = cfg.baseOwner || "castrolmocro";
-      const baseRepo = cfg.baseRepo || "New-white-e2ee-v2";
+      const baseRepo = cfg.baseRepo || "WHITE-V3";
       const now = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
       const branchName = branchOrRepo || `update-${now}`;
       let targetUrl = "", pushResults = [];
@@ -2634,7 +2634,7 @@ document.addEventListener("keydown", function(e) {
       const token = loadToken();
       if (!token) return res.json({ error: "أضف GitHub token أولاً في إعداد GitHub" });
       const owner = cfg.baseOwner || "castrolmocro";
-      const repo  = cfg.baseRepo  || "New-white-e2ee-v2";
+      const repo  = cfg.baseRepo  || "WHITE-V3";
       const { path: filePath, commitMsg, branch } = req.body;
       if (!filePath) return res.json({ error: "مسار الملف مطلوب" });
       const targetBranch = branch || "main";
@@ -2653,7 +2653,7 @@ document.addEventListener("keydown", function(e) {
       const token = loadToken();
       if (!token) return res.json({ error: "لا يوجد GitHub token" });
       const owner  = req.query.owner  || cfg.baseOwner || "castrolmocro";
-      const repo   = req.query.repo   || cfg.baseRepo  || "New-white-e2ee-v2";
+      const repo   = req.query.repo   || cfg.baseRepo  || "WHITE-V3";
       const branch = req.query.branch || "main";
       const treeFull = await ghApi(token, "GET",
         `/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`);
@@ -2670,7 +2670,7 @@ document.addEventListener("keydown", function(e) {
       const token = loadToken();
       if (!token) return res.json({ error: "لا يوجد GitHub token" });
       const owner  = req.query.owner  || cfg.baseOwner || "castrolmocro";
-      const repo   = req.query.repo   || cfg.baseRepo  || "New-white-e2ee-v2";
+      const repo   = req.query.repo   || cfg.baseRepo  || "WHITE-V3";
       const branch = req.query.branch || "main";
       const filePath = req.query.path;
       if (!filePath) return res.json({ error: "مسار الملف مطلوب" });
@@ -2687,7 +2687,7 @@ document.addEventListener("keydown", function(e) {
       const token = loadToken();
       if (!token) return res.json({ error: "لا يوجد GitHub token" });
       const owner  = req.body.owner  || cfg.baseOwner || "castrolmocro";
-      const repo   = req.body.repo   || cfg.baseRepo  || "New-white-e2ee-v2";
+      const repo   = req.body.repo   || cfg.baseRepo  || "WHITE-V3";
       const branch = req.body.branch || "main";
       const { path: filePath, content, commitMsg } = req.body;
       if (!filePath) return res.json({ error: "مسار الملف مطلوب" });
@@ -2703,7 +2703,7 @@ document.addEventListener("keydown", function(e) {
     const cfg      = loadCfg();
     const hasToken = hasStoredToken();
     const owner    = cfg.baseOwner || "castrolmocro";
-    const repo     = cfg.baseRepo  || "New-white-e2ee-v2";
+    const repo     = cfg.baseRepo  || "WHITE-V3";
 
     const body = `
 <style>
@@ -3059,7 +3059,7 @@ ${hasToken ? "loadTree();" : ""}
       const token = loadToken();
       if (!token) return res.json({ error: "أضف GitHub Token أولاً", step: "github-token" });
       const owner = cfg.baseOwner || "castrolmocro";
-      const baseRepo = cfg.baseRepo || "New-white-e2ee-v2";
+      const baseRepo = cfg.baseRepo || "WHITE-V3";
       const maxKeep = cfg.maxUpdateRepos || 5;
       const commitMsg = req.body.commitMsg || "🚀 تحديث من WHITE V3 Panel";
       const makePriv = req.body.makePrivate !== false;
@@ -3150,7 +3150,7 @@ ${hasToken ? "loadTree();" : ""}
       const sv = loadSmartVersions();
       const token = loadToken();
       const owner = cfg.baseOwner || "castrolmocro";
-      const baseRepo = cfg.baseRepo || "New-white-e2ee-v2";
+      const baseRepo = cfg.baseRepo || "WHITE-V3";
       const maxKeep = cfg.maxUpdateRepos || 5;
       const deleted = await cleanupOldUpdateRepos(token, owner, baseRepo, maxKeep, sv.currentIndex || 0);
       if (deleted.length) sv.updates = sv.updates.filter(u => !deleted.includes(u.repo));
