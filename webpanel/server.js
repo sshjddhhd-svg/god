@@ -2911,9 +2911,16 @@ app.post("/api/send", auth, (req, res) => {
   try {
     const { threadID, message } = req.body;
     if (!threadID || !message) return res.json({ error: "threadID و message مطلوبان" });
-    const api = global.GoatBot?.fcaApi;
-    if (!api) return res.json({ error: "البوت غير متصل" });
-    api.sendMessage(message, threadID, (err) => {
+    const fca = global.GoatBot?.fcaApi;
+    if (!fca) return res.json({ error: "البوت غير متصل — أعد تشغيل البوت أو حدّث الكوكيز" });
+    let replied = false;
+    const timer = setTimeout(() => {
+      if (!replied) { replied = true; res.json({ error: "انتهى وقت الإرسال — MQTT غير متصل، حدّث الكوكيز" }); }
+    }, 12000);
+    fca.sendMessage(message, threadID, (err) => {
+      if (replied) return;
+      replied = true;
+      clearTimeout(timer);
       if (err) return res.json({ error: err.message || String(err) });
       res.json({ ok: true });
     });
@@ -2982,7 +2989,11 @@ app.get("/send", auth, (req, res) => {
 
   <!-- Send Form -->
   <div class="card">
-    <div class="card-header"><div class="card-title">💬 نص الرسالة</div></div>
+    <div class="card-header">
+      <div class="card-title">💬 نص الرسالة</div>
+      <span id="botStatusDot" style="display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--text3)"><span id="botDotCircle" style="width:8px;height:8px;border-radius:50%;background:var(--text3);display:inline-block"></span><span id="botDotLabel">...</span></span>
+    </div>
+    <div id="botStatusBar" style="margin-bottom:6px"></div>
     <div class="form-group">
       <textarea id="msgText" class="form-control" rows="4" placeholder="اكتب رسالتك هنا..." style="resize:vertical"></textarea>
     </div>
@@ -3126,7 +3137,7 @@ function renderGroups(list){
     const emoji = g.emoji || (g.isGroup ? '👥' : '👤');
     const name  = g.name.length>28 ? g.name.substring(0,28)+'…' : g.name;
     const isSel = g.threadID === _selID;
-    return \`<div class="group-card\${isSel?' selected':''}" onclick="selectGroup('\${g.threadID}',\`\${escHtmlJS(g.name)}\`)">
+    return \`<div class="group-card\${isSel?' selected':''}" data-tid="\${escHtmlJS(g.threadID)}" data-name="\${escHtmlJS(g.name)}" onclick="selectGroup(this.dataset.tid,this.dataset.name)">
       <div style="display:flex;align-items:center;gap:10px">
         <div class="group-avatar" style="background:\${gbg(g.threadID)}">\${emoji}</div>
         <div style="flex:1;min-width:0">
@@ -3278,9 +3289,33 @@ async function sendAll(){
   showToast(\`✅ أُرسلت لـ \${ok} غرفة\`,'success');
 }
 
+// ── Bot Status ─────────────────────────────────────────────────────────────────
+async function checkBotStatus() {
+  try {
+    const r = await fetch('/api/status');
+    const d = await r.json();
+    const bar  = document.getElementById('botStatusBar');
+    const dot  = document.getElementById('botDotCircle');
+    const lbl  = document.getElementById('botDotLabel');
+    if (d.online) {
+      if (dot) { dot.style.background='var(--green)'; dot.style.animation='pulse 1.4s infinite'; }
+      if (lbl) lbl.textContent = 'متصل';
+      if (bar) bar.innerHTML = '';
+    } else {
+      if (dot) { dot.style.background='var(--yellow)'; dot.style.animation=''; }
+      if (lbl) lbl.textContent = 'غير متصل';
+      if (bar) bar.innerHTML = \`<div style="font-size:.76rem;padding:7px 10px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:8px;color:var(--yellow)">
+        ⚠️ البوت غير متصل — الإرسال سيفشل. <a href="/cookies" style="color:#60a5fa">حدّث الكوكيز</a> أو <a href="/" style="color:#60a5fa">أعد التشغيل</a>.
+      </div>\`;
+    }
+  } catch(_) {}
+}
+
 // Load on mount
+checkBotStatus();
 loadGroups();
 setInterval(loadGroups, 30000);
+setInterval(checkBotStatus, 15000);
 </script>`;
   res.send(layout("إرسال رسالة", body, "send"));
 });
