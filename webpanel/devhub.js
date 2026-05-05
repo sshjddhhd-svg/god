@@ -2317,6 +2317,45 @@ document.addEventListener("keydown", function(e) {
     } catch (e) { res.json({ error: e.message }); }
   });
 
+  // ── AI Claude (GitHub Files Assistant) ──────────────────────────────────────
+  app.post("/api/devhub/ai/claude", auth, async (req, res) => {
+    try {
+      const { message, history } = req.body;
+      if (!message) return res.json({ error: "message مطلوب" });
+      const cfg = loadCfg();
+      const savedHistory = (cfg.claudeHistory || []).slice(-10);
+      const combinedHistory = (history && history.length > 0) ? history : savedHistory;
+      const sysPrompt = `أنت Claude، مساعد ذكاء اصطناعي متخصص في تطوير بوت WHITE V3 (GoatBot — فيسبوك Messenger، Node.js).
+
+=== هيكل الملفات ===
+- scripts/cmds/*.js → أوامر البوت
+- scripts/events/*.js → أحداث البوت
+- config.json → إعدادات البوت
+- webpanel/server.js → لوحة التحكم
+
+=== قواعد الإجابة ===
+- اقرأ الملف المرفق بعناية وأجب على الطلب بدقة
+- اكتب الكود الكامل القابل للنسخ مباشرة
+- استخدم بلوكات \`\`\`javascript للكود
+- أجب بالعربية مع الكود الكامل جاهزاً للاستخدام
+- لا تختصر الكود — اكتبه كاملاً`;
+
+      const msgs = [
+        { role: "system", content: sysPrompt },
+        ...combinedHistory.slice(-8),
+        { role: "user", content: message }
+      ];
+      const reply = await callAI("openai", msgs);
+      cfg.claudeHistory = [
+        ...(cfg.claudeHistory || []).slice(-20),
+        { role: "user", content: message },
+        { role: "assistant", content: reply }
+      ];
+      saveCfg(cfg);
+      res.json({ ok: true, reply });
+    } catch (e) { res.json({ error: e.message }); }
+  });
+
   // ── Chat History ──────────────────────────────────────────────────────────────
   app.get("/api/devhub/chat/history", auth, (req, res) => {
     try {
@@ -3215,7 +3254,98 @@ ${hasToken ? "loadTree();" : ""}
   </div>
 </div>
 
-<!-- ─── قسم 3: مدير الملفات ─────────────────────────── -->
+<!-- ─── قسم 3: قوالب الكود ─────────────────────────── -->
+<div class="card" style="margin-bottom:16px;border-color:rgba(16,185,129,.35)">
+  <div class="card-header"><div class="card-title" style="color:var(--green)">📜 قوالب الكود الجاهزة</div></div>
+
+  <!-- Command Template -->
+  <div style="margin-bottom:14px">
+    <div style="font-size:.82rem;font-weight:700;color:var(--text);margin-bottom:8px">⚡ قالب أمر GoatBot (scripts/cmds/اسم_الأمر.js)</div>
+    <div style="background:#030712;border:1px solid var(--border);border-radius:10px;padding:14px;font-family:'Cascadia Code','Fira Code',monospace;font-size:.76rem;line-height:1.8;color:#e2e8f0;overflow-x:auto;white-space:pre">module.exports.config = {
+  name: "اسم_الأمر",          <span style="color:#4a6278">// اسم الأمر (بدون مسافات)</span>
+  version: "1.0",
+  hasPermssion: 0,             <span style="color:#4a6278">// 0=الكل | 1=مشرف المجموعة | 2=سوبر أدمن</span>
+  credits: "djamel",
+  description: "وصف الأمر",
+  commandCategory: "عام",
+  usages: "[نص اختياري]",
+  cooldowns: 5,
+  dependencies: {}
+};
+module.exports.onStart = async ({ api, event, args, message }) => {
+  const { threadID, messageID, senderID } = event;
+  try {
+    const text = args.join(" ") || "مرحباً!";
+    return message.reply("✅ " + text);
+  } catch (e) {
+    return message.reply("❌ خطأ: " + e.message);
+  }
+};</div>
+  </div>
+
+  <!-- Event Template -->
+  <div style="margin-bottom:14px">
+    <div style="font-size:.82rem;font-weight:700;color:var(--text);margin-bottom:8px">🔔 قالب حدث GoatBot (scripts/events/اسم_الحدث.js)</div>
+    <div style="background:#030712;border:1px solid var(--border);border-radius:10px;padding:14px;font-family:'Cascadia Code','Fira Code',monospace;font-size:.76rem;line-height:1.8;color:#e2e8f0;overflow-x:auto;white-space:pre">module.exports.config = {
+  name: "اسم_الحدث",
+  version: "1.0",
+  credits: "djamel",
+  description: "وصف الحدث",
+  category: "events"            <span style="color:#4a6278">// مهم جداً — لا تنساه</span>
+};
+module.exports.onStart = async () => {};  <span style="color:#4a6278">// مطلوب حتى لو فارغ</span>
+module.exports.onChat = async ({ api, event }) => {
+  const { threadID, body, senderID, type } = event;
+  if (type !== "message") return;
+  <span style="color:#4a6278">// منطق الحدث هنا</span>
+  if (body?.toLowerCase().includes("مرحبا")) {
+    api.sendMessage("👋 أهلاً وسهلاً!", threadID);
+  }
+};</div>
+  </div>
+
+  <!-- Quick API Reference -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
+    <div style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.2);border-radius:8px;padding:10px">
+      <div style="font-size:.78rem;font-weight:700;color:var(--accent2);margin-bottom:6px">📨 إرسال رسائل</div>
+      <div style="font-family:monospace;font-size:.72rem;color:var(--text2);line-height:1.9">
+        message.reply("نص")<br>
+        message.react("✅")<br>
+        api.sendMessage("نص", threadID)<br>
+        api.sendMessage({body:"نص", attachment: stream}, threadID)
+      </div>
+    </div>
+    <div style="background:rgba(139,92,246,.07);border:1px solid rgba(139,92,246,.2);border-radius:8px;padding:10px">
+      <div style="font-size:.78rem;font-weight:700;color:var(--purple);margin-bottom:6px">👤 معلومات المستخدم</div>
+      <div style="font-family:monospace;font-size:.72rem;color:var(--text2);line-height:1.9">
+        event.senderID → معرف المرسل<br>
+        event.threadID → معرف الغرفة<br>
+        event.body → نص الرسالة<br>
+        event.messageID → معرف الرسالة
+      </div>
+    </div>
+    <div style="background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.2);border-radius:8px;padding:10px">
+      <div style="font-size:.78rem;font-weight:700;color:var(--green);margin-bottom:6px">🛠️ إدارة المجموعة</div>
+      <div style="font-family:monospace;font-size:.72rem;color:var(--text2);line-height:1.9">
+        api.changeGroupName("الاسم", threadID)<br>
+        api.setTitle("اللقب", uid, threadID)<br>
+        api.addUserToGroup(uid, threadID)<br>
+        api.removeUserFromGroup(uid, threadID)
+      </div>
+    </div>
+    <div style="background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:10px">
+      <div style="font-size:.78rem;font-weight:700;color:var(--yellow);margin-bottom:6px">💡 نصائح مهمة</div>
+      <div style="font-size:.75rem;color:var(--text2);line-height:1.9">
+        • hasPermssion تُكتب بـ ss وليس s واحدة<br>
+        • الأحداث يجب أن تحتوي category: "events"<br>
+        • استخدم try/catch دائماً<br>
+        • لا تستخدم require() خارج dependencies
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── قسم 4: مدير الملفات ─────────────────────────── -->
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-bottom:16px">
   <div class="card" style="margin:0;border-color:rgba(16,185,129,.35)">
     <div class="card-header"><div class="card-title" style="color:var(--green)">📂 مدير الملفات</div></div>
