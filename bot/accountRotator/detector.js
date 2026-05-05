@@ -115,7 +115,7 @@ module.exports.onSendFailure = function (err) {
   }
 
   // Check consecutive failure threshold
-  if (sendFailures >= FAILURE_THRESHOLD) {
+  if (sendFailures >= getFailureThreshold()) {
     triggerRotation(`${sendFailures} consecutive send failures within ${FAILURE_WINDOW_MS / 1000}s`);
   }
 };
